@@ -21,6 +21,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.product.model.Product;
 import com.product.service.ProductService;
 
+import jakarta.validation.Valid;
+
 @RestController
 @RequestMapping("/products")
 public class ProductController {
@@ -31,7 +33,7 @@ public class ProductController {
 	private ProductService service;
 
 	@PostMapping("/product/create")
-	public ResponseEntity<Product> createProduct(@RequestBody Product product) {
+	public ResponseEntity<Product> createProduct(@Valid @RequestBody Product product) {
 		return new ResponseEntity<Product>(service.createProduct(product), HttpStatus.CREATED);
 	}
 
