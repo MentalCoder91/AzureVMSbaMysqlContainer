@@ -21,7 +21,7 @@ public class Product {
 	@NotBlank(message = "Product Name should not be blank,is mandatory")
 	private String productName;
 	
-	@NotBlank(message = "Product Price should not be blank,is mandatory")
+	
 	@Min(value=50, message = "Product Price must be atleast 50")
     @Max(value=40000, message = "Product Price should not be greater than 40000.00")
 	private Double productPrice;
