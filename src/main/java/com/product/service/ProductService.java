@@ -7,7 +7,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.product.exception.ErrorResponse;
+import com.product.exception.ProductNotFound;
 import com.product.model.Product;
 import com.product.repository.ProductRepository;
 
@@ -25,10 +25,10 @@ public class ProductService {
 		return repository.findAll();
 	}
 
-	public Product getProductById(Long id) throws Exception{
+	public Product getProductById(Long id) {
 		Optional<Product> product = repository.findById(id);
 		if (product.isEmpty()) {
-			throw new ErrorResponse("530","The product is empty");
+			throw new ProductNotFound("530","The product is empty");
 		}
 		return product.get();
 	}
@@ -36,7 +36,7 @@ public class ProductService {
 	public String deleteProductById(Long id) {
 		Optional<Product> product = repository.findById(id);
 		if (product.isEmpty()) {
-			throw new RuntimeException("The required id not present");
+			throw new ProductNotFound("530","The product is empty");
 		}
 
 		Product productDelete = product.get();
@@ -49,7 +49,7 @@ public class ProductService {
 
 		Optional<Product> product1 = repository.findById(id);
 		if (product1.isEmpty()) {
-			throw new RuntimeException("The required id not present");
+			throw new ProductNotFound("530","The product is empty");
 		}
 		Product product2 = product1.get(); // get the product.
 		BeanUtils.copyProperties(product, product2);

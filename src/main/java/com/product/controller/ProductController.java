@@ -1,7 +1,6 @@
 package com.product.controller;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,7 +18,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.product.exception.ErrorResponse;
 import com.product.model.Product;
 import com.product.service.ProductService;
 
@@ -54,18 +52,20 @@ public class ProductController {
 	@GetMapping("/product/{id}")
 	public ResponseEntity<?> getProductById(@PathVariable Long id) {
 
-		Product productById = null;
-		try {
-			productById = service.getProductById(id);
-			return new ResponseEntity<Product>(productById,HttpStatus.OK);
-		} catch (ErrorResponse e) {
-			log.info("The error=>{}", e.getMessage());
-			return new ResponseEntity<ErrorResponse>(e,HttpStatus.BAD_REQUEST);
-		}catch(Exception e) {
-			return new ResponseEntity<ErrorResponse>(new 
-					ErrorResponse("500",e.getMessage()),HttpStatus.INTERNAL_SERVER_ERROR);
-		}
-		
+		Product productById = service.getProductById(id);
+		return new ResponseEntity<Product>(productById, HttpStatus.OK);
+
+//			Product productById = null;
+//			try {
+//				productById = service.getProductById(id);
+//				return new ResponseEntity<Product>(productById,HttpStatus.OK);
+//			} catch (ErrorResponse e) {
+//				log.info("The error=>{}", e.getMessage());
+//				return new ResponseEntity<ErrorResponse>(e,HttpStatus.BAD_REQUEST);
+//			}catch(Exception e) {
+//				return new ResponseEntity<ErrorResponse>(new 
+//						ErrorResponse("500",e.getMessage()),HttpStatus.INTERNAL_SERVER_ERROR);
+//			}	
 	}
 
 	@DeleteMapping("/product/{id}")

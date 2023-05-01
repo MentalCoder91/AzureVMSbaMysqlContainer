@@ -1,11 +1,11 @@
 package com.product.exception;
 
-public class ErrorResponse extends RuntimeException{
+public class ProductNotFound extends RuntimeException{
 
 	private String errorCode;
 	private String errorMsg;
 	
-	public ErrorResponse(String errorCode, String errorMsg) {
+	public ProductNotFound(String errorCode, String errorMsg) {
 	
 		this.errorCode = errorCode;
 		this.errorMsg = errorMsg;
