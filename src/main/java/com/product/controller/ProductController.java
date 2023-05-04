@@ -1,10 +1,15 @@
 package com.product.controller;
 
+import java.net.URI;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -17,7 +22,10 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 
+import com.product.model.Offer;
 import com.product.model.Product;
 import com.product.service.ProductService;
 
@@ -26,6 +34,13 @@ import jakarta.validation.Valid;
 @RestController
 @RequestMapping("/products")
 public class ProductController {
+
+
+
+	@Autowired
+	private RestTemplate restTemplate;
+
+	private static final String OFFER_URI = "http://localhost:9099/offers/{startChar}";
 
 	Logger log = LoggerFactory.getLogger(this.getClass());
 
@@ -79,5 +94,80 @@ public class ProductController {
 	public ResponseEntity<Product> updateProduct(@PathVariable Long id, @RequestBody Product product) {
 		return new ResponseEntity<Product>(service.updateProduct(id, product), HttpStatus.OK);
 	}
+
+	@GetMapping("/product/offers")
+	public List<Product> getOfferProduct() {
+
+		List<Product> allProducts = service.getAllProducts();
+		List<Product> offerProductList = new ArrayList<>();
+
+		for (Product product : allProducts) {
+			// http://localhost:9099/offer/A
+			// http://localhost:9099/offer/B
+			try {
+				
+				String productName = product.getProductName().substring(0, 1); // Anish -> A // the value of the path
+				//Building RestTemplate *************																// variable
+				URI uri = UriComponentsBuilder.fromUriString(OFFER_URI).buildAndExpand(productName).toUri(); // uri
+
+				HttpHeaders headers = new HttpHeaders();
+				headers.set("content-type", "application/json");  //headers
+				HttpEntity<String> entity = new HttpEntity<>(headers); // entity
+				//***********************
+				ResponseEntity<Offer> response = restTemplate.exchange(uri, HttpMethod.GET, entity, Offer.class);
+				Offer offerObj = response.getBody();
+				
+				product.setProductPrice(product.getProductPrice() - (offerObj.getOfferPercentage()*0.01*product.getProductPrice()));
+				offerProductList.add(product);
+
+			} catch (Exception ex) {
+
+				log.error("Ther err->{}",ex);
+			}
+
+		}
+
+		return offerProductList;
+
+	}
+	
+	@GetMapping("/product/offerAsync")
+	public List<Product> getOfferProductAsync() {
+
+		List<Product> allProducts = service.getAllProducts();
+		List<Product> offerProductList = new ArrayList<>();
+
+		for (Product product : allProducts) {
+			// http://localhost:9099/offer/A
+			// http://localhost:9099/offer/B
+			try {
+				
+				String productName = product.getProductName().substring(0, 1); // Anish -> A // the value of the path
+				//Building RestTemplate *************																// variable
+				URI uri = UriComponentsBuilder.fromUriString(OFFER_URI).buildAndExpand(productName).toUri(); // uri
+
+				HttpHeaders headers = new HttpHeaders();
+				headers.set("content-type", "application/json");  //headers
+				HttpEntity<String> entity = new HttpEntity<>(headers); // entity
+				//***********************
+				ResponseEntity<Offer> response = restTemplate.exchange(uri, HttpMethod.GET, entity, Offer.class);
+				Offer offerObj = response.getBody();
+				
+				product.setProductPrice(product.getProductPrice() - (offerObj.getOfferPercentage()*0.01*product.getProductPrice()));
+				offerProductList.add(product);
+
+			} catch (Exception ex) {
+
+				log.error("Ther err->{}",ex);
+			}
+
+		}
+
+		return offerProductList;
+
+	}
+	
+	
+	
 
 }
