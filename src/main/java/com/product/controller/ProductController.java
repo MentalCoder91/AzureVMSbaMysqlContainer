@@ -3,6 +3,8 @@ package com.product.controller;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,8 +36,6 @@ import jakarta.validation.Valid;
 @RestController
 @RequestMapping("/products")
 public class ProductController {
-
-
 
 	@Autowired
 	private RestTemplate restTemplate;
@@ -105,24 +105,25 @@ public class ProductController {
 			// http://localhost:9099/offer/A
 			// http://localhost:9099/offer/B
 			try {
-				
+
 				String productName = product.getProductName().substring(0, 1); // Anish -> A // the value of the path
-				//Building RestTemplate *************																// variable
+				// Building RestTemplate ************* // variable
 				URI uri = UriComponentsBuilder.fromUriString(OFFER_URI).buildAndExpand(productName).toUri(); // uri
 
 				HttpHeaders headers = new HttpHeaders();
-				headers.set("content-type", "application/json");  //headers
+				headers.set("content-type", "application/json"); // headers
 				HttpEntity<String> entity = new HttpEntity<>(headers); // entity
-				//***********************
+				// ***********************
 				ResponseEntity<Offer> response = restTemplate.exchange(uri, HttpMethod.GET, entity, Offer.class);
 				Offer offerObj = response.getBody();
-				
-				product.setProductPrice(product.getProductPrice() - (offerObj.getOfferPercentage()*0.01*product.getProductPrice()));
+
+				product.setProductPrice(
+						product.getProductPrice() - (offerObj.getOfferPercentage() * 0.01 * product.getProductPrice()));
 				offerProductList.add(product);
 
 			} catch (Exception ex) {
 
-				log.error("Ther err->{}",ex);
+				log.error("Ther err->{}", ex);
 			}
 
 		}
@@ -130,44 +131,43 @@ public class ProductController {
 		return offerProductList;
 
 	}
-	
+
 	@GetMapping("/product/offerAsync")
 	public List<Product> getOfferProductAsync() {
 
 		List<Product> allProducts = service.getAllProducts();
-		List<Product> offerProductList = new ArrayList<>();
 
-		for (Product product : allProducts) {
-			// http://localhost:9099/offer/A
-			// http://localhost:9099/offer/B
-			try {
-				
-				String productName = product.getProductName().substring(0, 1); // Anish -> A // the value of the path
-				//Building RestTemplate *************																// variable
-				URI uri = UriComponentsBuilder.fromUriString(OFFER_URI).buildAndExpand(productName).toUri(); // uri
+		List<CompletableFuture<Product>> allFutures = allProducts.stream().map(product -> {
 
-				HttpHeaders headers = new HttpHeaders();
-				headers.set("content-type", "application/json");  //headers
-				HttpEntity<String> entity = new HttpEntity<>(headers); // entity
-				//***********************
-				ResponseEntity<Offer> response = restTemplate.exchange(uri, HttpMethod.GET, entity, Offer.class);
-				Offer offerObj = response.getBody();
-				
-				product.setProductPrice(product.getProductPrice() - (offerObj.getOfferPercentage()*0.01*product.getProductPrice()));
-				offerProductList.add(product);
-
-			} catch (Exception ex) {
-
-				log.error("Ther err->{}",ex);
-			}
-
-		}
-
-		return offerProductList;
-
+			CompletableFuture<Product> futureProduct = CompletableFuture.supplyAsync(() -> {
+				String startChar = product.getProductName().substring(0, 1);
+				Product callRestAsync = callRestAsync(startChar, product);
+				return callRestAsync;
+			});
+			return futureProduct;
+		}).collect(Collectors.toList());
+		
+		List<Product> productList = allFutures.stream().map(cf -> cf.join()).collect(Collectors.toList());
+		return productList;
 	}
-	
-	
-	
+
+	private Product callRestAsync(String startChar, Product product) {
+
+		log.info("The Thread name ->{}", Thread.currentThread().getName());
+		// Building RestTemplate ************* // variable
+		URI uri = UriComponentsBuilder.fromUriString(OFFER_URI).buildAndExpand(startChar).toUri(); // uri
+
+		HttpHeaders headers = new HttpHeaders();
+		headers.set("content-type", "application/json"); // headers
+		HttpEntity<String> entity = new HttpEntity<>(headers); // entity
+		// ***********************
+		ResponseEntity<Offer> response = restTemplate.exchange(uri, HttpMethod.GET, entity, Offer.class);
+		Offer offerObj = response.getBody();
+
+		product.setProductPrice(
+				product.getProductPrice() - (offerObj.getOfferPercentage() * 0.01 * product.getProductPrice()));
+
+		return product;
+	}
 
 }
