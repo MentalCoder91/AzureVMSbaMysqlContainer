@@ -2,6 +2,7 @@ package com.product.controller;
 
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
@@ -31,6 +32,7 @@ import com.product.model.Offer;
 import com.product.model.Product;
 import com.product.service.ProductService;
 
+import jakarta.annotation.PostConstruct;
 import jakarta.validation.Valid;
 
 @RestController
@@ -46,6 +48,16 @@ public class ProductController {
 
 	@Autowired
 	private ProductService service;
+	
+	
+	
+	 @PostConstruct
+	    public void init() {
+		 service.saveProducts(Arrays.asList(
+	               new Product("Laptop",100.50),
+	               new Product("Xbox",200.50),
+	               new Product("Ipad",300.50)));
+	    }
 
 	@PostMapping("/product/create")
 	public ResponseEntity<Product> createProduct(@Valid @RequestBody Product product) {

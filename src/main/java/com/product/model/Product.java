@@ -29,6 +29,14 @@ public class Product {
 	public Product() {
 		super();
 	}
+	
+	public Product(@NotBlank(message = "Product Name should not be blank,is mandatory") String productName,
+			@Min(value = 50, message = "Product Price must be atleast 50") @Max(value = 40000, message = "Product Price should not be greater than 40000.00") Double productPrice) {
+		super();
+		this.productName = productName;
+		this.productPrice = productPrice;
+	}
+
 	public Long getProductId() {
 		return productId;
 	}
