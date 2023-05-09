@@ -5,7 +5,7 @@ COPY src /usr/src/app/src
 COPY pom.xml /usr/src/app
 WORKDIR /usr/src/app/
 RUN mvn clean package -DskipTests
-COPY target/*.jar /usr/src/app/sba-app.jar
+COPY target/azure-sba-mysql-container-0.0.1-SNAPSHOT.jar /usr/src/app/sba-app.jar
 
 # Deploy stage
 FROM  openjdk:17-jdk-alpine
