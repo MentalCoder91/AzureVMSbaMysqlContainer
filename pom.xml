@@ -10,7 +10,7 @@
 		<relativePath /> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.product</groupId>
-	<artifactId>product-ms</artifactId>
+	<artifactId>azure-sba-mysql-container</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>product-ms</name>
 	<description>This is product ms</description>
